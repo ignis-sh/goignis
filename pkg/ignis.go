@@ -1,0 +1,76 @@
+package pkg
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"os/exec"
+
+	dbus "github.com/godbus/dbus/v5"
+)
+
+const (
+	IgnisDest       string          = "com.github.linkfrg.ignis"
+	IgnisObjectPath dbus.ObjectPath = "/com/github/linkfrg/ignis"
+)
+
+func DBusCallIgnis(ctx context.Context, methodName string, args Args, retvalues ...any) (err error) {
+	err = DBusCall(ctx, IgnisDest, IgnisObjectPath, "com.github.linkfrg.ignis", methodName, args, retvalues...)
+	return
+}
+
+func InitIgnis(ctx context.Context, configPath string, daemon bool) (pid int, err error) {
+	cmd := exec.Command("ignis", "init")
+	if len(configPath) != 0 {
+		cmd.Args = append(cmd.Args, "-c", configPath)
+	}
+	if daemon {
+		err = cmd.Start()
+		pid = cmd.Process.Pid
+	} else {
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+	}
+	if err != nil {
+		err = fmt.Errorf("failed to run command: %w", err)
+		return
+	}
+	return
+}
+
+func QuitIgnis(ctx context.Context) (err error) {
+	err = DBusCallIgnis(ctx, "Quit", nil)
+	return
+}
+
+func ReloadIgnis(ctx context.Context) (err error) {
+	err = DBusCallIgnis(ctx, "Reload", nil)
+	return
+}
+
+func OpenInspector(ctx context.Context) (err error) {
+	err = DBusCallIgnis(ctx, "Inspector", nil)
+	return
+}
+
+func ListWindows(ctx context.Context) (windows []string, err error) {
+	err = DBusCallIgnis(ctx, "ListWindows", nil, &windows)
+	return
+}
+
+func ToggleWindow(ctx context.Context, windowName string) (found bool, err error) {
+	err = DBusCallIgnis(ctx, "ToggleWindow", Args{windowName}, &found)
+	return
+}
+
+func OpenWindow(ctx context.Context, windowName string) (found bool, err error) {
+	err = DBusCallIgnis(ctx, "OpenWindow", Args{windowName}, &found)
+	return
+}
+
+func CloseWindow(ctx context.Context, windowName string) (found bool, err error) {
+	err = DBusCallIgnis(ctx, "CloseWindow", Args{windowName}, &found)
+	return
+}
