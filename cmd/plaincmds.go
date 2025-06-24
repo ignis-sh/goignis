@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -12,24 +13,26 @@ import (
 )
 
 func init() {
+	renderWindowCmd := func(cmd *cobra.Command, found bool) {
+		if !found {
+			cmd.PrintErrln("No such window")
+			os.Exit(1)
+		}
+	}
+
 	// subcommands without args or return values
+	addPlainCmd("systeminfo", "Print system information", pkg.IgnisSystemInfo)
 	addPlainCmd("quit", "Quit Ignis", pkg.QuitIgnis)
 	addPlainCmd("reload", "Reload Ignis", pkg.ReloadIgnis)
 	addPlainCmd("inspector", "Open GTK Inspector", pkg.OpenInspector)
 	// subcommands with no args but one single return value
-	addPlainCmdWithResult("list-windows", "List names of all windows", pkg.ListWindows, func(windows []string) {
+	addPlainCmdWithResult("list-windows", "List names of all windows", pkg.ListWindows, func(_ *cobra.Command, windows []string) {
 		fmt.Println(strings.Join(windows, "\n"))
 	})
 	// subcommands with one single argument and one single return value
-	addPlainCmdWithArgResult("toggle-window", "Toggle a window", pkg.ToggleWindow, pkg.ListWindows, func(found bool) {
-		fmt.Println(found)
-	})
-	addPlainCmdWithArgResult("open-window", "Open a window", pkg.OpenWindow, pkg.ListWindows, func(found bool) {
-		fmt.Println(found)
-	})
-	addPlainCmdWithArgResult("close-window", "Close a window", pkg.CloseWindow, pkg.ListWindows, func(found bool) {
-		fmt.Println(found)
-	})
+	addPlainCmdWithArgResult("toggle-window", "Toggle a window", pkg.ToggleWindow, pkg.ListWindows, renderWindowCmd)
+	addPlainCmdWithArgResult("open-window", "Open a window", pkg.OpenWindow, pkg.ListWindows, renderWindowCmd)
+	addPlainCmdWithArgResult("close-window", "Close a window", pkg.CloseWindow, pkg.ListWindows, renderWindowCmd)
 	// For more complicated subcommands, use `cobra-cli add xxx` instead
 }
 
@@ -43,6 +46,7 @@ func addPlainCmd(use, short string, callback func(context.Context) error) {
 			err := callback(context.Background())
 			if err != nil {
 				cmd.PrintErrln("Failed:", err)
+				os.Exit(1)
 				return
 			}
 		},
@@ -63,6 +67,7 @@ func addPlainCmdWithArg(
 			err := callback(context.Background(), args[0])
 			if err != nil {
 				cmd.PrintErrln("Failed:", err)
+				os.Exit(1)
 				return
 			}
 		},
@@ -72,7 +77,7 @@ func addPlainCmdWithArg(
 func addPlainCmdWithResult[T any](
 	use, short string,
 	callback func(context.Context) (T, error),
-	render func(T),
+	render func(*cobra.Command, T),
 ) {
 	rootCmd.AddCommand(&cobra.Command{
 		Use:               use,
@@ -83,10 +88,11 @@ func addPlainCmdWithResult[T any](
 			result, err := callback(context.Background())
 			if err != nil {
 				cmd.PrintErrln("Failed:", err)
+				os.Exit(1)
 				return
 			}
 			if !renderResultIfJSON(result) {
-				render(result)
+				render(cmd, result)
 			}
 		},
 	})
@@ -96,7 +102,7 @@ func addPlainCmdWithArgResult[T any](
 	use, short string,
 	callback func(context.Context, string) (T, error),
 	completion func(context.Context) ([]cobra.Completion, error),
-	render func(T),
+	render func(*cobra.Command, T),
 ) {
 	rootCmd.AddCommand(&cobra.Command{
 		Use:               use,
@@ -107,10 +113,11 @@ func addPlainCmdWithArgResult[T any](
 			result, err := callback(context.Background(), args[0])
 			if err != nil {
 				cmd.PrintErrln("Failed:", err)
+				os.Exit(1)
 				return
 			}
 			if !renderResultIfJSON(result) {
-				render(result)
+				render(cmd, result)
 			}
 		},
 	})

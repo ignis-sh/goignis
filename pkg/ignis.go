@@ -19,8 +19,21 @@ func DBusCallIgnis(ctx context.Context, methodName string, args Args, retvalues 
 	return
 }
 
+func IgnisSystemInfo(ctx context.Context) (err error) {
+	cmd := exec.CommandContext(ctx, "ignis", "systeminfo")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("failed to run command: %w", err)
+		return
+	}
+	return
+}
+
 func InitIgnis(ctx context.Context, configPath string, daemon bool) (pid int, err error) {
-	cmd := exec.Command("ignis", "init")
+	cmd := exec.CommandContext(ctx, "ignis", "init")
 	if len(configPath) != 0 {
 		cmd.Args = append(cmd.Args, "-c", configPath)
 	}

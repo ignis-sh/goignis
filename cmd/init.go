@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/lost-melody/goignis/pkg"
 	"github.com/spf13/cobra"
@@ -20,9 +21,10 @@ var initCmd = &cobra.Command{
 		pid, err := pkg.InitIgnis(context.Background(), config, daemon)
 		if err != nil {
 			cmd.PrintErrln("Failed:", err)
+			os.Exit(1)
 			return
 		}
-		if daemon {
+		if daemon && !renderResultIfJSON(pid) {
 			fmt.Println("Running ignis as a daemon, pid:", pid)
 		}
 	},
