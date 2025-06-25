@@ -21,27 +21,28 @@ func init() {
 	}
 
 	// subcommands without args or return values
-	addPlainCmd("systeminfo", "Print system information", pkg.IgnisSystemInfo)
-	addPlainCmd("quit", "Quit Ignis", pkg.QuitIgnis)
-	addPlainCmd("reload", "Reload Ignis", pkg.ReloadIgnis)
-	addPlainCmd("inspector", "Open GTK Inspector", pkg.OpenInspector)
+	AddPlainCmd("systeminfo", "Print system information", pkg.IgnisSystemInfo)
+	AddPlainCmd("quit", "Quit Ignis", pkg.QuitIgnis)
+	AddPlainCmd("reload", "Reload Ignis", pkg.ReloadIgnis)
+	AddPlainCmd("inspector", "Open GTK Inspector", pkg.OpenInspector)
 	// subcommands with no args but one single return value
-	addPlainCmdWithResult("list-windows", "List names of all windows", pkg.ListWindows, func(_ *cobra.Command, windows []string) {
+	AddPlainCmdWithResult("list-windows", "List names of all windows", pkg.ListWindows, func(_ *cobra.Command, windows []string) {
 		fmt.Println(strings.Join(windows, "\n"))
 	})
 	// subcommands with one single argument and one single return value
-	addPlainCmdWithArgResult("toggle-window", "Toggle a window", pkg.ToggleWindow, pkg.ListWindows, renderWindowCmd)
-	addPlainCmdWithArgResult("open-window", "Open a window", pkg.OpenWindow, pkg.ListWindows, renderWindowCmd)
-	addPlainCmdWithArgResult("close-window", "Close a window", pkg.CloseWindow, pkg.ListWindows, renderWindowCmd)
+	AddPlainCmdWithArgResult("toggle-window", "Toggle a window", pkg.ToggleWindow, pkg.ListWindows, renderWindowCmd)
+	AddPlainCmdWithArgResult("open-window", "Open a window", pkg.OpenWindow, pkg.ListWindows, renderWindowCmd)
+	AddPlainCmdWithArgResult("close-window", "Close a window", pkg.CloseWindow, pkg.ListWindows, renderWindowCmd)
 	// For more complicated subcommands, use `cobra-cli add xxx` instead
 }
 
-func addPlainCmd(use, short string, callback func(context.Context) error) {
+// AddPlainCmd adds a subcommand to root, without args or results.
+func AddPlainCmd(use, short string, callback func(context.Context) error) {
 	rootCmd.AddCommand(&cobra.Command{
 		Use:               use,
 		Short:             short,
 		Args:              cobra.NoArgs,
-		ValidArgsFunction: argsCompletionFunc(nil),
+		ValidArgsFunction: SimpleCompletionFunc(nil),
 		Run: func(cmd *cobra.Command, args []string) {
 			err := callback(context.Background())
 			if err != nil {
@@ -53,7 +54,8 @@ func addPlainCmd(use, short string, callback func(context.Context) error) {
 	})
 }
 
-func addPlainCmdWithArg(
+// AddPlainCmdWithArg adds a subcommand to root, with no results but one single argument.
+func AddPlainCmdWithArg(
 	use, short string,
 	callback func(context.Context, string) error,
 	completion func(context.Context) ([]cobra.Completion, error),
@@ -62,7 +64,7 @@ func addPlainCmdWithArg(
 		Use:               use,
 		Short:             short,
 		Args:              cobra.ExactArgs(1),
-		ValidArgsFunction: argsCompletionFunc(completion),
+		ValidArgsFunction: SimpleCompletionFunc(completion),
 		Run: func(cmd *cobra.Command, args []string) {
 			err := callback(context.Background(), args[0])
 			if err != nil {
@@ -74,7 +76,8 @@ func addPlainCmdWithArg(
 	})
 }
 
-func addPlainCmdWithResult[T any](
+// AddPlainCmdWithResult adds a subcommand to root, with no args but one single result.
+func AddPlainCmdWithResult[T any](
 	use, short string,
 	callback func(context.Context) (T, error),
 	render func(*cobra.Command, T),
@@ -83,7 +86,7 @@ func addPlainCmdWithResult[T any](
 		Use:               use,
 		Short:             short,
 		Args:              cobra.NoArgs,
-		ValidArgsFunction: argsCompletionFunc(nil),
+		ValidArgsFunction: SimpleCompletionFunc(nil),
 		Run: func(cmd *cobra.Command, args []string) {
 			result, err := callback(context.Background())
 			if err != nil {
@@ -91,14 +94,15 @@ func addPlainCmdWithResult[T any](
 				os.Exit(1)
 				return
 			}
-			if !renderResultIfJSON(result) {
+			if !RenderJSONIfFlagged(result) {
 				render(cmd, result)
 			}
 		},
 	})
 }
 
-func addPlainCmdWithArgResult[T any](
+// AddPlainCmdWithArgResult adds a subcommand to root, with one argument and one result.
+func AddPlainCmdWithArgResult[T any](
 	use, short string,
 	callback func(context.Context, string) (T, error),
 	completion func(context.Context) ([]cobra.Completion, error),
@@ -108,7 +112,7 @@ func addPlainCmdWithArgResult[T any](
 		Use:               use,
 		Short:             short,
 		Args:              cobra.ExactArgs(1),
-		ValidArgsFunction: argsCompletionFunc(completion),
+		ValidArgsFunction: SimpleCompletionFunc(completion),
 		Run: func(cmd *cobra.Command, args []string) {
 			result, err := callback(context.Background(), args[0])
 			if err != nil {
@@ -116,14 +120,15 @@ func addPlainCmdWithArgResult[T any](
 				os.Exit(1)
 				return
 			}
-			if !renderResultIfJSON(result) {
+			if !RenderJSONIfFlagged(result) {
 				render(cmd, result)
 			}
 		},
 	})
 }
 
-func argsCompletionFunc(provider func(context.Context) ([]cobra.Completion, error)) cobra.CompletionFunc {
+// SimpleCompletionFunc returns a shell completion func that provides fixed suggestions.
+func SimpleCompletionFunc(provider func(context.Context) ([]cobra.Completion, error)) cobra.CompletionFunc {
 	return func(cmd *cobra.Command, args []string, toComplete string) (completions []cobra.Completion, directive cobra.ShellCompDirective) {
 		directive = cobra.ShellCompDirectiveNoFileComp
 		if len(args) != 0 || provider == nil {

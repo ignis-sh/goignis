@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var flagJSON bool
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "goignis",
@@ -23,22 +25,25 @@ func Execute() {
 	}
 }
 
-// renderJSON returns whether the flag 'json' is set
-func renderJSON() bool {
-	useJSON, _ := rootCmd.PersistentFlags().GetBool("json")
-	return useJSON
+// GetRootCmd returns the root command instance.
+func GetRootCmd() *cobra.Command {
+	return rootCmd
 }
 
-// renderResultIfJSON prints the result in json if flag 'json' is set, or do nothing and return false
-func renderResultIfJSON(result any) bool {
-	useJSON := renderJSON()
-	if useJSON {
+// FlaggedJSON returns whether the flag "json" is set.
+func FlaggedJSON() bool {
+	return flagJSON
+}
+
+// RenderJSONIfFlagged prints the result in json if flag "json" is set, or do nothing and return false.
+func RenderJSONIfFlagged(result any) bool {
+	if flagJSON {
 		data, _ := json.Marshal(result)
 		fmt.Printf("%s\n", data)
 	}
-	return useJSON
+	return flagJSON
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("json", "j", false, "Print results in json")
+	rootCmd.PersistentFlags().BoolVarP(&flagJSON, "json", "j", false, "Print results in json")
 }

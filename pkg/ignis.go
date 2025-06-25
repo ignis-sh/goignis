@@ -12,13 +12,18 @@ import (
 const (
 	IgnisDest       string          = "com.github.linkfrg.ignis"
 	IgnisObjectPath dbus.ObjectPath = "/com/github/linkfrg/ignis"
+	IgnisInterface  string          = "com.github.linkfrg.ignis"
 )
 
+// DBusCallIgnis calls methods provided by interface "com.github.linkfrg.ignis".
+//
+// For methods from other interfaces or objects, use [DBusCall] instead.
 func DBusCallIgnis(ctx context.Context, methodName string, args Args, retvalues ...any) (err error) {
-	err = DBusCall(ctx, IgnisDest, IgnisObjectPath, "com.github.linkfrg.ignis", methodName, args, retvalues...)
+	err = DBusCall(ctx, IgnisDest, IgnisObjectPath, IgnisInterface, methodName, args, retvalues...)
 	return
 }
 
+// IgnisSystemInfo simply executes command "ignis systeminfo".
 func IgnisSystemInfo(ctx context.Context) (err error) {
 	cmd := exec.CommandContext(ctx, "ignis", "systeminfo")
 	cmd.Stdin = os.Stdin
@@ -32,6 +37,9 @@ func IgnisSystemInfo(ctx context.Context) (err error) {
 	return
 }
 
+// InitIgnis executes command "ignis init".
+//
+// If daemon is true, the child process is spawned and leaked, without stdin/stdout/stderr piped.
 func InitIgnis(ctx context.Context, configPath string, daemon bool) (pid int, err error) {
 	cmd := exec.CommandContext(ctx, "ignis", "init")
 	if len(configPath) != 0 {
