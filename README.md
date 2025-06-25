@@ -4,8 +4,68 @@
 
 ## Installation
 
+### Prerequisites
+
+Install the latest [go tool chain](https://go.dev/dl/).
+
+Or install with a package manager:
+
 ```sh
+pacman -S go
+```
+
+### Quick start
+
+Install with _Go_ tool chain:
+
+```sh
+# install into $GOPATH/bin, usually ~/go/bin
 go install github.com/ignis-sh/goignis@latest
+```
+
+Optionally, manage packages with [gup](https://github.com/nao1215/gup):
+
+```sh
+# install gup
+go install github.com/nao1215/gup@latest
+# manage packages
+gup list
+gup check
+gup update
+```
+
+### Shell completions
+
+Bash:
+
+```sh
+# prerequisite: install bash-completion
+pacman -S bash-completion
+# current shell session only
+source <(goignis completion bash)
+# install permanently
+mkdir -p ~/.local/share/bash-completion/completions/
+goignis completion bash >~/.local/share/bash-completion/completions/goignis.bash
+```
+
+Fish:
+
+```sh
+# current shell session only
+goignis completion fish | source
+# install permanently
+mkdir -p ~/.config/fish/completions/
+goignis completion fish >~/.config/fish/completions/goignis.fish
+```
+
+### Build manually
+
+Clone and build:
+
+```sh
+git clone https://github.com/ignis-sh/goignis.git
+cd goignis
+go build
 ```
 
 ## Usage
@@ -54,4 +114,35 @@ List all _ignis_ windows:
 
 ```sh
 goignis list-windows -j | jq
+```
+
+## Development
+
+Install [gopls](https://github.com/golang/tools/blob/master/gopls/README.md), the _Go_ language server:
+
+```sh
+pacman -S gopls
+```
+
+### Contribution
+
+- Use _gopls_ or _gofumpt_ formatters.
+- Write docs and add examples or unit tests if new features are introduced.
+- Keep package `pkg` and `cmd` their own roles:
+  - Package `pkg` provides exported APIs for third-party derivations.
+  - Package `cmd` provides APIs for customizing subcommands.
+
+### Derivation
+
+- Import `github.com/ignis-sh/goignis/pkg` if you're willing to make use of those APIs.
+- Import `github.com/ignis-sh/goignis/cmd` if you want to add custom subcommands.
+- If your features can benefit other users, please consider contributing here :).
+
+```sh
+# create a new project and add goignis as a dependency
+mkdir myowncli && cd myowncli
+go mod init github.com/username/myowncli
+go get github.com/ignis-sh/goignis
+# then you can write your features with APIs from goignis
+nvim main.go
 ```
