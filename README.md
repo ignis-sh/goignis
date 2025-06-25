@@ -5,7 +5,7 @@
 ## Installation
 
 ```sh
-go install github.com/lost-melody/goignis@latest
+go install github.com/ignis-sh/goignis@latest
 ```
 
 ## Usage

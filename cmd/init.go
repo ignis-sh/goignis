@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lost-melody/goignis/pkg"
+	"github.com/ignis-sh/goignis/pkg"
 	"github.com/spf13/cobra"
 )
 

@@ -1,4 +1,4 @@
-module github.com/lost-melody/goignis
+module github.com/ignis-sh/goignis
 
 go 1.24.4
 

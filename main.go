@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/lost-melody/goignis/cmd"
+	"github.com/ignis-sh/goignis/cmd"
 )
 
 func main() {
