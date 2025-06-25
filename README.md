@@ -132,6 +132,15 @@ pacman -S gopls
   - Package `pkg` provides exported APIs for third-party derivations.
   - Package `cmd` provides APIs for customizing subcommands.
 
+```sh
+# clone and install dependencies
+git clone https://github.com/ignis-sh/goignis.git
+cd goignis
+go mod tidy
+# start coding here
+nvim
+```
+
 ### Derivation
 
 - Import `github.com/ignis-sh/goignis/pkg` if you're willing to make use of those APIs.
