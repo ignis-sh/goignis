@@ -58,6 +58,12 @@ mkdir -p ~/.config/fish/completions/
 goignis completion fish >~/.config/fish/completions/goignis.fish
 ```
 
+### Install from _AUR_
+
+```sh
+paru -S goignis
+```
+
 ### Build manually
 
 Clone and build:
