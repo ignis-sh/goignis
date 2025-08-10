@@ -95,3 +95,13 @@ func CloseWindow(ctx context.Context, windowName string) (found bool, err error)
 	err = DBusCallIgnis(ctx, "CloseWindow", Args{windowName}, &found)
 	return
 }
+
+func ListCommands(ctx context.Context) (commands []string, err error) {
+	err = DBusCallIgnis(ctx, "ListCommands", nil, &commands)
+	return
+}
+
+func RunCommand(ctx context.Context, commandName string, commandArgs []string) (found bool, output string, err error) {
+	err = DBusCallIgnis(ctx, "RunCommand", Args{commandName, commandArgs}, &found, &output)
+	return
+}
