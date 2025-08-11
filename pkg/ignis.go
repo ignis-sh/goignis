@@ -101,7 +101,7 @@ func ListCommands(ctx context.Context) (commands []string, err error) {
 	return
 }
 
-func RunCommand(ctx context.Context, commandName string, commandArgs []string) (found bool, output string, err error) {
-	err = DBusCallIgnis(ctx, "RunCommand", Args{commandName, commandArgs}, &found, &output)
+func RunCommand(ctx context.Context, commandName string, commandArgs []string) (cmdError string, output string, err error) {
+	err = DBusCallIgnis(ctx, "RunCommand", Args{commandName, commandArgs}, &cmdError, &output)
 	return
 }

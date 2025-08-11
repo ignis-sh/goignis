@@ -33,14 +33,14 @@ var runCommandCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		// run command `args[0]` with `args[1:]` as command args
-		found, output, err := pkg.RunCommand(context.Background(), args[0], args[1:])
+		cmdError, output, err := pkg.RunCommand(context.Background(), args[0], args[1:])
 		if err != nil {
 			cmd.PrintErrln("Failed:", err)
 			os.Exit(1)
 			return
 		}
-		if !found {
-			cmd.PrintErrln("No such command")
+		if cmdError != "" {
+			cmd.PrintErrln(cmdError)
 			os.Exit(1)
 			return
 		}
