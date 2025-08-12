@@ -88,10 +88,12 @@ Available Commands:
   help          Help about any command
   init          Initialize Ignis
   inspector     Open GTK Inspector
+  list-commands List names of all commands
   list-windows  List names of all windows
   open-window   Open a window
   quit          Quit Ignis
   reload        Reload Ignis
+  run-command   Run a custom command
   systeminfo    Print system information
   toggle-window Toggle a window
 
@@ -120,6 +122,13 @@ List all _ignis_ windows:
 
 ```sh
 goignis list-windows -j | jq
+```
+
+List and run _ignis_ custom commands:
+
+```sh
+goignis list-commands
+goignis run-command command-name [args...]
 ```
 
 ## Development
