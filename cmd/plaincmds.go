@@ -29,6 +29,9 @@ func init() {
 	AddPlainCmdWithResult("list-windows", "List names of all windows", pkg.ListWindows, func(_ *cobra.Command, windows []string) {
 		fmt.Println(strings.Join(windows, "\n"))
 	})
+	AddPlainCmdWithResult("list-commands", "List names of all commands", pkg.ListCommands, func(_ *cobra.Command, commands []string) {
+		fmt.Println(strings.Join(commands, "\n"))
+	})
 	// subcommands with one single argument and one single return value
 	AddPlainCmdWithArgResult("toggle-window", "Toggle a window", pkg.ToggleWindow, pkg.ListWindows, renderWindowCmd)
 	AddPlainCmdWithArgResult("open-window", "Open a window", pkg.OpenWindow, pkg.ListWindows, renderWindowCmd)
